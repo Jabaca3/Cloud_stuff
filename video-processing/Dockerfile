@@ -28,6 +28,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+COPY test.avi ./
+
 # Install only production dependencies
 RUN npm install --only=production
 
