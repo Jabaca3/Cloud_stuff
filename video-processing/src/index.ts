@@ -11,17 +11,6 @@ app.post("/process-video", (req, res) => {
   if (!inputFilePath || !outputFilePath) {
     res.status(400).send("Bad Request: Missing file path.");
   }
-
-  ffmpeg(inputFilePath)
-    .outputOptions("-vf", "scale=-1:360")
-    .on("end", () => {
-      res.status(200).send("Process completed successfully ");
-    })
-    .on("error", (err) => {
-      console.log(`An error occured: ${err} `);
-      res.status(500).send(`internal service error: ${err.message}`);
-    })
-    .save(outputFilePath);
 });
 
 const port = process.env.PORT || 3000;
