@@ -10,7 +10,10 @@ const processedVideoBucketName = "jb-v.1-processed-videos";
 const localRawVideoPath = "./raw-videos";
 const localProcessedVideoPath = "./procssed-videos";
 
-export function setupDirectories() {}
+export function setupDirectories() {
+  ensureDirectoryExistence(localRawVideoPath);
+  ensureDirectoryExistence(localProcessedVideoPath);
+}
 
 export function convertVideo(rawVideoName: string, processedVideoName: string) {
   return new Promise<void>((resolve, reject) => {
@@ -38,6 +41,45 @@ export async function downloadRawVideo(fileName: string) {
   );
 }
 
-export async function uploadProcessedVideo(fineName: string) {
+export async function uploadProcessedVideo(fileName: string) {
   const bucket = storage.bucket(processedVideoBucketName);
+  await bucket.upload(`${localProcessedVideoPath} / ${fileName}`, {
+    destination: fileName,
+  });
+  console.log(
+    `${localProcessedVideoPath}/${fileName} uploaded to gs://${processedVideoBucketName}/${fileName}.`
+  );
+
+  await bucket.file(fileName).makePublic();
+}
+
+export async function deleteFile(filePath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(filePath)) {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.log(`Failed to delete file at ${filePath}`, err);
+        }
+      });
+      reject(`File ${filePath} does not exist`);
+    } else {
+      console.log(`File not found at ${filePath}, skipping the delete.`);
+      resolve();
+    }
+  });
+}
+
+function ensureDirectoryExistence(dirPath: string) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true }); //allows creating nested directories
+    console.log(`Directory created at ${dirPath}`);
+  }
+}
+
+export function deleteRawVideo(fileName: string) {
+  return deleteFile(`${localRawVideoPath}/${fileName}`);
+}
+
+export function deleteProcssedVideo(fileName: string) {
+  return deleteFile(`${localProcessedVideoPath}}/${fileName}`);
 }
