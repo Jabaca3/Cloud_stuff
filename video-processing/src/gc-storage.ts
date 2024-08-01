@@ -4,11 +4,11 @@ import ffmpeg from "fluent-ffmpeg";
 
 const storage = new Storage();
 
-const rawVideoBucketName = "jb-v.1-raw-videos";
-const processedVideoBucketName = "jb-v.1-processed-videos";
+const rawVideoBucketName = "jb-v1-raw-videos";
+const processedVideoBucketName = "jb-v1-processed-videos";
 
 const localRawVideoPath = "./raw-videos";
-const localProcessedVideoPath = "./procssed-videos";
+const localProcessedVideoPath = "./processed-videos";
 
 export function setupDirectories() {
   ensureDirectoryExistence(localRawVideoPath);
@@ -18,13 +18,13 @@ export function setupDirectories() {
 export function convertVideo(rawVideoName: string, processedVideoName: string) {
   return new Promise<void>((resolve, reject) => {
     ffmpeg(`${localRawVideoPath}/${rawVideoName}`)
-      .outputOptions("-vf", "scale=-1:360")
-      .on("end", () => {
-        console.log("Process completed successfully ");
+      .outputOptions("-vf", "scale=-1:360") // 360p
+      .on("end", function () {
+        console.log("Processing finished successfully");
         resolve();
       })
-      .on("error", (err) => {
-        console.log(`An error occured: ${err} `);
+      .on("error", function (err: any) {
+        console.log("An error occurred: " + err.message);
         reject(err);
       })
       .save(`${localProcessedVideoPath}/${processedVideoName}`);
